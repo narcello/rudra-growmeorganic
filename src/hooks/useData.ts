@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PaginationType } from "../types";
 
 const BASE_API_URL = "https://api.artic.edu/api/v1/artworks";
 
@@ -7,7 +8,7 @@ interface IGetData {
 }
 
 function useData() {
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState<PaginationType>();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
