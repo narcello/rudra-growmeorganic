@@ -1,0 +1,4 @@
+.checkbox-header .p-column-header-content {
+  flex-direction: row-reverse;
+  gap: 6px;
+}
