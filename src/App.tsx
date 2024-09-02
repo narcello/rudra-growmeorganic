@@ -14,13 +14,14 @@ function App() {
   const { data, getData, pagination, isLoading } = useData();
   const [selectedItems, setSelectedItems] = useState<ArtworksType[]>([]);
   let [rowsNumberSelected, setRowsNumberSelected] = useState(0);
+  const [needToSelectMoreItems, setNeedToSelectMoreItems] = useState(true);
 
   useEffect(() => {
     getData();
   }, []);
 
   useEffect(() => {
-    handleSelectItemsBasedOnInputValue();
+    if (needToSelectMoreItems) handleSelectItemsBasedOnInputValue();
   }, [pagination.current_page]);
 
   const handlePagination = (statePagination: DataTableStateEvent) => {
@@ -29,6 +30,7 @@ function App() {
 
   const handleSubmitRowsSelected = (ev: SyntheticEvent<Element, Event>) => {
     ev.preventDefault();
+    setNeedToSelectMoreItems(true);
     overlayPanel.current?.toggle(ev);
     handleSelectItemsBasedOnInputValue();
   };
@@ -54,6 +56,8 @@ function App() {
         missingSpots--;
       }
     }
+    if (missingSpots === 0 && preSelectedItems.size === rowsNumberSelected)
+      setNeedToSelectMoreItems(false);
 
     setSelectedItems([...Array.from(preSelectedItems)]);
   };
