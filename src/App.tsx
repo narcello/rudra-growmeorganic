@@ -37,29 +37,32 @@ function App() {
 
   const handleSelectItemsBasedOnInputValue = () => {
     if (!data?.length) return;
+
     const cloneCurrentData = [...data];
     let preSelectedItems = new Set<ArtworksType>(selectedItems);
-    let missingSpots = rowsNumberSelected - preSelectedItems.size;
+    const selectedCount = selectedItems.length;
+    let missingSpots = Math.max(rowsNumberSelected - selectedCount, 0);
 
-    if (missingSpots === 0) return;
-    if (rowsNumberSelected > selectedItems.length)
-      missingSpots = rowsNumberSelected - selectedItems.length;
-    else if (rowsNumberSelected < selectedItems.length) {
-      missingSpots = rowsNumberSelected;
-      preSelectedItems = new Set<ArtworksType>();
+    if (missingSpots === 0) {
+      if (rowsNumberSelected < selectedCount) {
+        preSelectedItems = new Set<ArtworksType>();
+        missingSpots = rowsNumberSelected;
+      } else return setSelectedItems([...preSelectedItems]);
     }
 
     while (missingSpots > 0 && cloneCurrentData.length > 0) {
-      const [artwork] = cloneCurrentData.splice(0, 1);
-      if (!preSelectedItems.has(artwork)) {
+      const artwork = cloneCurrentData.shift();
+      if (artwork && !preSelectedItems.has(artwork)) {
         preSelectedItems.add(artwork);
         missingSpots--;
       }
     }
-    if (missingSpots === 0 && preSelectedItems.size === rowsNumberSelected)
-      setNeedToSelectMoreItems(false);
 
-    setSelectedItems([...Array.from(preSelectedItems)]);
+    if (missingSpots === 0 && preSelectedItems.size === rowsNumberSelected) {
+      setNeedToSelectMoreItems(false);
+    }
+
+    setSelectedItems([...preSelectedItems]);
   };
 
   return (
