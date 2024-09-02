@@ -7,12 +7,13 @@ import "./app.css";
 
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import { ArtworksType } from "./types";
 
 function App() {
   const overlayPanel = useRef<OverlayPanel>(null);
   const { data, getData, pagination, isLoading } = useData();
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [rowsNumberSelected, setRowsNumberSelected] = useState(0);
+  const [selectedItems, setSelectedItems] = useState<ArtworksType[]>([]);
+  let [rowsNumberSelected, setRowsNumberSelected] = useState(0);
 
   useEffect(() => {
     getData();
@@ -20,7 +21,7 @@ function App() {
 
   useEffect(() => {
     handleSelectItemsBasedOnInputValue();
-  }, [pagination.current_page, rowsNumberSelected]);
+  }, [pagination.current_page]);
 
   const handlePagination = (statePagination: DataTableStateEvent) => {
     getData({ page: statePagination.page! + 1 });
@@ -29,21 +30,32 @@ function App() {
   const handleSubmitRowsSelected = (ev: SyntheticEvent<Element, Event>) => {
     ev.preventDefault();
     overlayPanel.current?.toggle(ev);
+    handleSelectItemsBasedOnInputValue();
   };
 
   const handleSelectItemsBasedOnInputValue = () => {
-    let cloneSelectedItems = [...selectedItems];
-
-    if (selectedItems.length === rowsNumberSelected) return;
-    if (selectedItems.length > rowsNumberSelected) cloneSelectedItems = [];
-
+    if (!data?.length) return;
     const cloneCurrentData = [...data];
-    const portion = cloneCurrentData.splice(
-      0,
-      rowsNumberSelected - cloneSelectedItems.length
-    );
+    let preSelectedItems = new Set<ArtworksType>(selectedItems);
+    let missingSpots = rowsNumberSelected - preSelectedItems.size;
 
-    setSelectedItems([...cloneSelectedItems, ...portion]);
+    if (missingSpots === 0) return;
+    if (rowsNumberSelected > selectedItems.length)
+      missingSpots = rowsNumberSelected - selectedItems.length;
+    else if (rowsNumberSelected < selectedItems.length) {
+      missingSpots = rowsNumberSelected;
+      preSelectedItems = new Set<ArtworksType>();
+    }
+
+    while (missingSpots > 0 && cloneCurrentData.length > 0) {
+      const [artwork] = cloneCurrentData.splice(0, 1);
+      if (!preSelectedItems.has(artwork)) {
+        preSelectedItems.add(artwork);
+        missingSpots--;
+      }
+    }
+
+    setSelectedItems([...Array.from(preSelectedItems)]);
   };
 
   return (
