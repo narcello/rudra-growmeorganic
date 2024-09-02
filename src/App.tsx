@@ -8,6 +8,7 @@ import "./app.css";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { ArtworksType } from "./types";
+import { addItemsToSelection, updatePreSelectedItems } from "./utils";
 
 function App() {
   const overlayPanel = useRef<OverlayPanel>(null);
@@ -39,24 +40,12 @@ function App() {
     if (!data?.length) return;
 
     const cloneCurrentData = [...data];
-    let preSelectedItems = new Set<ArtworksType>(selectedItems);
-    const selectedCount = selectedItems.length;
-    let missingSpots = Math.max(rowsNumberSelected - selectedCount, 0);
+    let [preSelectedItems, missingSpots] = updatePreSelectedItems(
+      rowsNumberSelected,
+      selectedItems
+    );
 
-    if (missingSpots === 0) {
-      if (rowsNumberSelected < selectedCount) {
-        preSelectedItems = new Set<ArtworksType>();
-        missingSpots = rowsNumberSelected;
-      } else return setSelectedItems([...preSelectedItems]);
-    }
-
-    while (missingSpots > 0 && cloneCurrentData.length > 0) {
-      const artwork = cloneCurrentData.shift();
-      if (artwork && !preSelectedItems.has(artwork)) {
-        preSelectedItems.add(artwork);
-        missingSpots--;
-      }
-    }
+    addItemsToSelection(preSelectedItems, missingSpots, cloneCurrentData);
 
     if (missingSpots === 0 && preSelectedItems.size === rowsNumberSelected) {
       setNeedToSelectMoreItems(false);
