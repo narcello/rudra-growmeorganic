@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PaginationType } from "../types";
+import { ArtworksType, PaginationType } from "../types";
 
 const BASE_API_URL = "https://api.artic.edu/api/v1/artworks";
 
@@ -20,7 +20,7 @@ function useData() {
   const [pagination, setPagination] = useState<PaginationType>(
     initialPaginationValue
   );
-  const [data, setData] = useState<{ [key: string]: any }>({});
+  const [data, setData] = useState<{ [key: string]: ArtworksType[] }>({});
   const [isLoading, setIsLoading] = useState(false);
 
   async function getData(props?: IGetData) {
